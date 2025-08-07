@@ -3,6 +3,8 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
+import datetime
+
 
 load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')
@@ -14,13 +16,28 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+CALENDAR = ["ПН","ВТ","СР","ЧТ","ПТ","СБ","ВС"]
+
+
 @bot.event
 async def on_ready():
     print(f"We are ready to go, {bot.user.name}")
 
 @bot.command()
-async def hello(ctx):
-    await ctx.send(f"Hello, {ctx.author.mention}!")
+async def schedule(ctx, *, quest="", window = 7):
+    ping = ""
+    if quest=="":
+        text = "Когда собираемся?"
+    else:
+        text = f"Когда собираемся на {quest}?"
+        role = next((lambda x: x.name==quest,ctx.guild.roles),None)
+        if (role!=None):
+            ping = role.mention        
+    newpoll = discord.Poll(text, datetime.timedelta(hours=1), multiple=True)
+    for i in range(window):
+        newpoll = newpoll.add_answer(text=CALENDAR[(datetime.date.today()+datetime.timedelta(days=i)).weekday()],emoji=None)
+    await ctx.send(content = ping, poll = newpoll)
+
 
 @bot.command()
 async def dm(ctx):
