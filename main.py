@@ -23,20 +23,21 @@ CALENDAR = ["ПН","ВТ","СР","ЧТ","ПТ","СБ","ВС"]
 async def on_ready():
     print(f"We are ready to go, {bot.user.name}")
 
-@bot.command()
+@bot.hybrid_command()
 async def schedule(ctx, *, quest="", window = 7):
     ping = ""
     if quest=="":
         text = "Когда собираемся?"
     else:
         text = f"Когда собираемся на {quest}?"
-        role = next((lambda x: x.name==quest,ctx.guild.roles),None)
+        role = next(filter(lambda x: x.name==quest,ctx.guild.roles),None)
         if (role!=None):
-            ping = role.mention        
+            ping = role.mention
+            await ctx.send(content = ping)
     newpoll = discord.Poll(text, datetime.timedelta(hours=1), multiple=True)
     for i in range(window):
         newpoll = newpoll.add_answer(text=CALENDAR[(datetime.date.today()+datetime.timedelta(days=i)).weekday()],emoji=None)
-    await ctx.send(content = ping, poll = newpoll)
+    await ctx.send(poll = newpoll)
 
 
 @bot.command()
