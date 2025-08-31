@@ -28,7 +28,7 @@ async def on_ready():
     await bot.tree.sync()
 
 @bot.hybrid_command(description="Make a poll for specific roll schedule")
-async def schedule(ctx:commands.Context, role:discord.Role=None, duration:int=7):
+async def schedule(ctx:commands.Context, role:discord.Role=None, duration:int=7, pm:bool=False):
     if role==None or role==discord.Role.is_default: 
         text = "Когда собираемся?"
     else:
@@ -39,7 +39,13 @@ async def schedule(ctx:commands.Context, role:discord.Role=None, duration:int=7)
         duration=7
     for i in range(duration):
         newpoll = newpoll.add_answer(text=CALENDAR[(datetime.date.today()+datetime.timedelta(days=i+1)).weekday()],emoji=None)
-    await ctx.send(poll = newpoll)
+    link = await ctx.send(poll=newpoll)
+
+    if pm:
+        if role!=None and role!=discord.Role.is_default: 
+            for member in ctx.guild.members:
+                if (role in member.roles):
+                    await ctx.author.send(link.jump_url)
 
 
 
