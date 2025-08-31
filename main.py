@@ -14,34 +14,38 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='/', intents=intents)
 
 CALENDAR = ["ПН","ВТ","СР","ЧТ","ПТ","СБ","ВС"]
+LENGTH = [1,2,3,4,5,6,7,8,9,10]
+
 
 
 @bot.event
 async def on_ready():
-    print(f"We are ready to go, {bot.user.name}")
+    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+    print('------')
+    await bot.tree.sync()
 
-@bot.hybrid_command()
-async def schedule(ctx, *, quest="", window = 7):
-    ping = ""
-    if quest=="":
+@bot.hybrid_command(description="Make a poll for specific roll schedule")
+async def schedule(ctx:commands.Context, role:discord.Role=None, duration:int=7):
+    if role==None or role==discord.Role.is_default: 
         text = "Когда собираемся?"
     else:
-        text = f"Когда собираемся на {quest}?"
-        role = next(filter(lambda x: x.name==quest,ctx.guild.roles),None)
-        if (role!=None):
-            ping = role.mention
-            await ctx.send(content = ping)
-    newpoll = discord.Poll(text, datetime.timedelta(hours=1), multiple=True)
-    for i in range(window):
-        newpoll = newpoll.add_answer(text=CALENDAR[(datetime.date.today()+datetime.timedelta(days=i)).weekday()],emoji=None)
+        text = f"Когда собираемся на {role.name}?"
+        await ctx.send(content = role.mention)
+    newpoll = discord.Poll(text, datetime.timedelta(days=7), multiple=True)
+    if duration not in range(1,10):
+        duration=7
+    for i in range(duration):
+        newpoll = newpoll.add_answer(text=CALENDAR[(datetime.date.today()+datetime.timedelta(days=i+1)).weekday()],emoji=None)
     await ctx.send(poll = newpoll)
+
 
 
 @bot.command()
 async def dm(ctx):
     await ctx.author.send(f"You suck!")
+
 
 bot.run(TOKEN, log_handler=handler, log_level=logging.DEBUG)
