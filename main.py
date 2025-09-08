@@ -35,10 +35,11 @@ async def schedule(ctx:commands.Context, role:discord.Role=None, duration:int=7,
         text = f"Когда собираемся на {role.name}?"
         await ctx.send(content = role.mention)
     newpoll = discord.Poll(text, datetime.timedelta(days=7), multiple=True)
-    if duration not in range(1,10):
+    if duration not in range(1,9):
         duration=7
     for i in range(duration):
         newpoll = newpoll.add_answer(text=CALENDAR[(datetime.date.today()+datetime.timedelta(days=i+1)).weekday()],emoji=None)
+    newpoll = newpoll.add_answer(text="Позже",emoji=None)
     link = await ctx.send(poll=newpoll)
 
     if pm:
